@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Chip : MonoBehaviour
 {
@@ -22,12 +19,11 @@ public class Chip : MonoBehaviour
 
     public void SetCell(Cell cell)
     {
-        if (CurrentCell != null)
-        {
-            CurrentCell.Clear();
-        }
-
         CurrentCell = cell;
         cell.SetChip(this);
+
+        RectTransform.SetParent(cell.transform, false);
+        RectTransform.anchoredPosition = Vector2.zero;
+        RectTransform.localScale = Vector3.one;
     }
 }

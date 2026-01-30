@@ -6,57 +6,52 @@ using System.Collections.Generic;
 public class DragManager : MonoBehaviour
 {
     [SerializeField] private Canvas canvas;
+    [SerializeField] private MergeManager mergeManager;
 
-    private Chip _draggedChip;
-    private Vector2 _startPosition;
-    private Cell _startCell;
+    private Chip draggedChip;
+    private Cell startCell;
 
-    private GraphicRaycaster _raycaster;
-    private PointerEventData _pointerEventData;
+    private GraphicRaycaster raycaster;
+    private PointerEventData pointerEventData;
 
     private void Awake()
     {
-        _raycaster = canvas.GetComponent<GraphicRaycaster>();
-        _pointerEventData = new PointerEventData(null);
+        raycaster = canvas.GetComponent<GraphicRaycaster>();
+        pointerEventData = new PointerEventData(null);
     }
 
     private void Update()
-    {
-        HandleInput();
-    }
-
-    private void HandleInput()
     {
         if (Input.GetMouseButtonDown(0))
         {
             TryPickChip();
         }
-        else if (Input.GetMouseButton(0) && _draggedChip != null)
+        else if (Input.GetMouseButton(0) && draggedChip != null)
         {
             DragChip();
         }
-        else if (Input.GetMouseButtonUp(0) && _draggedChip != null)
+        else if (Input.GetMouseButtonUp(0) && draggedChip != null)
         {
             ReleaseChip();
         }
     }
+
     private void TryPickChip()
     {
-        _pointerEventData.position = Input.mousePosition;
-
+        pointerEventData.position = Input.mousePosition;
         var results = new List<RaycastResult>();
-        _raycaster.Raycast(_pointerEventData, results);
+        raycaster.Raycast(pointerEventData, results);
 
-        foreach (var result in results)
+        foreach (var r in results)
         {
-            Chip chip = result.gameObject.GetComponent<Chip>();
+            Chip chip = r.gameObject.GetComponent<Chip>();
             if (chip != null)
             {
-                _draggedChip = chip;
-                _startCell = chip.CurrentCell;
-                _startPosition = chip.RectTransform.anchoredPosition;
+                draggedChip = chip;
+                startCell = chip.CurrentCell;
 
-                chip.transform.SetAsLastSibling(); // поверх всего
+                draggedChip.RectTransform.SetParent(canvas.transform, true);
+                draggedChip.RectTransform.SetAsLastSibling();
                 break;
             }
         }
@@ -68,51 +63,49 @@ public class DragManager : MonoBehaviour
             canvas.transform as RectTransform,
             Input.mousePosition,
             canvas.worldCamera,
-            out Vector2 localPoint
+            out Vector2 pos
         );
 
-        _draggedChip.RectTransform.anchoredPosition = localPoint;
+        draggedChip.RectTransform.anchoredPosition = pos;
     }
 
     private void ReleaseChip()
     {
         Cell targetCell = GetCellUnderCursor();
 
-        if (targetCell == null)
+        if (targetCell == null || targetCell == startCell)
         {
-            ReturnToStart();
+            draggedChip.SetCell(startCell);
         }
         else if (targetCell.IsEmpty)
         {
-            _draggedChip.SetCell(targetCell);
+            draggedChip.SetCell(targetCell);
         }
-        else if (targetCell.CurrentChip.Level == _draggedChip.Level)
+        else if (
+            targetCell.CurrentChip != null &&
+            targetCell.CurrentChip != draggedChip &&
+            targetCell.CurrentChip.Level == draggedChip.Level
+        )
         {
-            ReturnToStart(); // временно
+            mergeManager.Merge(draggedChip, targetCell.CurrentChip, targetCell);
         }
         else
         {
-            ReturnToStart();
+            draggedChip.SetCell(startCell);
         }
 
-        _draggedChip = null;
-    }
-
-    private void ReturnToStart()
-    {
-        _draggedChip.SetCell(_startCell);
+        draggedChip = null;
     }
 
     private Cell GetCellUnderCursor()
     {
-        _pointerEventData.position = Input.mousePosition;
-
+        pointerEventData.position = Input.mousePosition;
         var results = new List<RaycastResult>();
-        _raycaster.Raycast(_pointerEventData, results);
+        raycaster.Raycast(pointerEventData, results);
 
-        foreach (var result in results)
+        foreach (var r in results)
         {
-            Cell cell = result.gameObject.GetComponent<Cell>();
+            Cell cell = r.gameObject.GetComponent<Cell>();
             if (cell != null)
                 return cell;
         }
