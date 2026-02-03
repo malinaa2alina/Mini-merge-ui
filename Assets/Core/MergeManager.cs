@@ -4,22 +4,28 @@ using System.Collections;
 public class MergeManager : MonoBehaviour
 {
     [SerializeField] private GridManager gridManager;
+    [SerializeField] private int maxLevel = 6;
+
     public void Merge(Chip from, Chip to, Cell targetCell)
     {
+        if (to.Level >= maxLevel)
+        {
+            from.SetCell(from.CurrentCell);
+            return;
+        }
+
         int newLevel = from.Level + 1;
 
-        //чистим через фишки
-        from.CurrentCell?.Clear();
-        to.CurrentCell?.Clear();
+        from.CurrentCell.Clear();
+        to.CurrentCell.Clear();
 
         Destroy(from.gameObject);
         Destroy(to.gameObject);
 
         Chip newChip = gridManager.SpawnChip(targetCell, newLevel);
         AnimateMerge(newChip);
-
-        Debug.Log($"MERGED {from.Level} + {to.Level} => {newLevel}");
     }
+
 
     private void AnimateMerge(Chip chip)
     {

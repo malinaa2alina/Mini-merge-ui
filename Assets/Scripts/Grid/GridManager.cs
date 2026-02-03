@@ -55,4 +55,25 @@ public class GridManager : MonoBehaviour
             }
         }
     }
+
+    public void SpawnRandomChip()
+    {
+        List<Cell> emptyCells = new List<Cell>();
+
+        foreach (var cell in cells)
+        {
+            if (cell.IsEmpty)
+                emptyCells.Add(cell);
+        }
+
+        if (emptyCells.Count == 0)
+        {
+            Debug.Log("No empty cells");
+            return;
+        }
+
+        Cell targetCell = emptyCells[Random.Range(0, emptyCells.Count)];
+        SpawnChip(targetCell, 1);
+    }
+
 }
