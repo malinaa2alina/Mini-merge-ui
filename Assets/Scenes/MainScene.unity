@@ -1155,7 +1155,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridManager: {fileID: 836321349}
-  maxLevel: 6
+  maxLevel: 5
 --- !u!4 &1627812329
 Transform:
   m_ObjectHideFlags: 0

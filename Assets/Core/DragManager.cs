@@ -9,7 +9,6 @@ public class DragManager : MonoBehaviour
     [SerializeField] private MergeManager mergeManager;
 
     private Chip draggedChip;
-    private Cell startCell;
 
     private GraphicRaycaster raycaster;
     private PointerEventData pointerEventData;
@@ -39,11 +38,10 @@ public class DragManager : MonoBehaviour
         foreach (var r in results)
         {
             Chip chip = r.gameObject.GetComponent<Chip>();
-            if (chip == null)
-                continue;
+            if (chip == null) continue;
 
             draggedChip = chip;
-            startCell = chip.CurrentCell;
+            draggedChip.BeginDrag();
 
             draggedChip.RectTransform.SetParent(canvas.transform, true);
             draggedChip.RectTransform.SetAsLastSibling();
@@ -67,25 +65,30 @@ public class DragManager : MonoBehaviour
     {
         Cell targetCell = GetCellUnderCursor();
 
-        if (targetCell == null || targetCell == startCell)
+        if (targetCell == null || targetCell == draggedChip.StartCell)
         {
-            draggedChip.SetCell(startCell);
+            draggedChip.SetCell(draggedChip.StartCell);
         }
         else if (targetCell.IsEmpty)
         {
             draggedChip.SetCell(targetCell);
         }
-        else if (
-            targetCell.CurrentChip != null &&
-            targetCell.CurrentChip != draggedChip &&
-            targetCell.CurrentChip.Level == draggedChip.Level
-        )
+        else if (targetCell.CurrentChip.Level == draggedChip.Level)
         {
-            mergeManager.Merge(draggedChip, targetCell.CurrentChip, targetCell);
+            bool merged = mergeManager.Merge(
+                draggedChip,
+                targetCell.CurrentChip,
+                targetCell
+            );
+
+            if (!merged)
+            {
+                draggedChip.SetCell(draggedChip.StartCell);
+            }
         }
         else
         {
-            draggedChip.SetCell(startCell);
+            draggedChip.SetCell(draggedChip.StartCell);
         }
 
         draggedChip = null;

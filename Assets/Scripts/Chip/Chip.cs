@@ -10,6 +10,7 @@ public class Chip : MonoBehaviour
     public int Level { get; private set; }
     public RectTransform RectTransform { get; private set; }
     public Cell CurrentCell { get; private set; }
+    public Cell StartCell { get; private set; }
 
     private void Awake()
     {
@@ -21,10 +22,14 @@ public class Chip : MonoBehaviour
 
     public void Init(int level, Cell cell)
     {
-        Debug.Log($"Init chip level {level}");
         Level = level;
         UpdateVisual();
         SetCell(cell);
+    }
+
+    public void BeginDrag()
+    {
+        StartCell = CurrentCell;
     }
 
     private void UpdateVisual()
@@ -45,5 +50,4 @@ public class Chip : MonoBehaviour
         RectTransform.anchoredPosition = Vector2.zero;
         RectTransform.localScale = Vector3.one;
     }
-
 }

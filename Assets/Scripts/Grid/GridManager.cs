@@ -20,23 +20,25 @@ public class GridManager : MonoBehaviour
 
     public Chip SpawnChip(Cell cell, int level)
     {
-        if (cell == null)
-        {
-            Debug.LogError("SpawnChip: cell is null");
-            return null;
-        }
-
-        if (!cell.IsEmpty)
-        {
-            Debug.LogError("SpawnChip: cell is NOT empty");
-            return null;
-        }
-
-        Chip chip = Instantiate(chipPrefab, gridRoot); 
+        Chip chip = Instantiate(chipPrefab);
         chip.Init(level, cell);
-
-        Debug.Log("Spawned chip level " + level);
+        Debug.Log($"Spawned chip level {level}");
         return chip;
+    }
+
+    public void SpawnRandomChip()
+    {
+        List<Cell> empty = new();
+
+        foreach (var c in cells)
+            if (c.IsEmpty)
+                empty.Add(c);
+
+        if (empty.Count == 0)
+            return;
+
+        Cell target = empty[Random.Range(0, empty.Count)];
+        SpawnChip(target, 1);
     }
 
     private void SpawnTestChips()
@@ -45,35 +47,13 @@ public class GridManager : MonoBehaviour
 
         foreach (var cell in cells)
         {
-            if (cell.IsEmpty)
-            {
-                SpawnChip(cell, 1);
-                spawned++;
+            if (!cell.IsEmpty) continue;
 
-                if (spawned >= 2)
-                    break;
-            }
+            SpawnChip(cell, 1);
+            spawned++;
+
+            if (spawned >= 2)
+                break;
         }
     }
-
-    public void SpawnRandomChip()
-    {
-        List<Cell> emptyCells = new List<Cell>();
-
-        foreach (var cell in cells)
-        {
-            if (cell.IsEmpty)
-                emptyCells.Add(cell);
-        }
-
-        if (emptyCells.Count == 0)
-        {
-            Debug.Log("No empty cells");
-            return;
-        }
-
-        Cell targetCell = emptyCells[Random.Range(0, emptyCells.Count)];
-        SpawnChip(targetCell, 1);
-    }
-
 }
