@@ -23,17 +23,11 @@ public class DragManager : MonoBehaviour
     private void Update()
     {
         if (Input.GetMouseButtonDown(0))
-        {
             TryPickChip();
-        }
         else if (Input.GetMouseButton(0) && draggedChip != null)
-        {
             DragChip();
-        }
         else if (Input.GetMouseButtonUp(0) && draggedChip != null)
-        {
             ReleaseChip();
-        }
     }
 
     private void TryPickChip()
@@ -45,15 +39,15 @@ public class DragManager : MonoBehaviour
         foreach (var r in results)
         {
             Chip chip = r.gameObject.GetComponent<Chip>();
-            if (chip != null)
-            {
-                draggedChip = chip;
-                startCell = chip.CurrentCell;
+            if (chip == null)
+                continue;
 
-                draggedChip.RectTransform.SetParent(canvas.transform, true);
-                draggedChip.RectTransform.SetAsLastSibling();
-                break;
-            }
+            draggedChip = chip;
+            startCell = chip.CurrentCell;
+
+            draggedChip.RectTransform.SetParent(canvas.transform, true);
+            draggedChip.RectTransform.SetAsLastSibling();
+            break;
         }
     }
 

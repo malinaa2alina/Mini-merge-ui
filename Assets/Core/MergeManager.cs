@@ -8,17 +8,18 @@ public class MergeManager : MonoBehaviour
     {
         int newLevel = from.Level + 1;
 
-        targetCell.Clear();
-        from.CurrentCell?.Clear(); // безопасно
+        //чистим через фишки
+        from.CurrentCell?.Clear();
+        to.CurrentCell?.Clear();
 
         Destroy(from.gameObject);
         Destroy(to.gameObject);
 
         Chip newChip = gridManager.SpawnChip(targetCell, newLevel);
         AnimateMerge(newChip);
+
+        Debug.Log($"MERGED {from.Level} + {to.Level} => {newLevel}");
     }
-
-
 
     private void AnimateMerge(Chip chip)
     {
